@@ -5,13 +5,9 @@ import os
 load_dotenv()
 
 
-CONFIG = {
-    "database": {
-        "type": "PostgreSQL",
-        "host": "localhost",
-        "port": 5432,
-        "user": os.getenv("USERNAME_DB"),
-        "password": os.getenv("PASSWORD_DB"),
-        "dbname": "smartgymdb"
-    }
-}
+class Config:
+    # PostgreSQL configuration
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+config = Config
