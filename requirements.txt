@@ -1,6 +1,7 @@
 Flask==3.0.0
 Flask-SocketIO==5.3.6
 Flask-CORS==4.0.2
+flask-sqlalchemy==3.1.1
 Flask-JWT-Extended==4.5.3
 eventlet==0.35.2
 opencv-python==4.8.1.78
