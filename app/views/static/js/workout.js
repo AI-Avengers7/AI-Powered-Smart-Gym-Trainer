@@ -7,6 +7,7 @@ let websocket = null;
 let videoWidth = 640;
 let videoHeight = 480;
 
+
 // Create canvas for frame processing
 const canvas = document.createElement('canvas');
 const context = canvas.getContext('2d');
