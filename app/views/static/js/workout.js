@@ -1,6 +1,6 @@
-const videoElement = document.getElementById('videoElement');
-const startButton = document.getElementById('startCamera');
-const stopButton = document.getElementById('stopCamera');
+const videoElement = document.getElementById('video');
+const startButton = document.getElementById('startExercise');
+const stopButton = document.getElementById('EndExercise');
 
 let mediaStream = null;
 let websocket = null;
@@ -25,7 +25,7 @@ startButton.addEventListener('click', async () => {
       videoElement.srcObject = mediaStream;
 
       // Setup WebSocket connection
-      websocket = new WebSocket('ws://198.168.0.241:5000/ws');
+      websocket = new WebSocket('ws://localhost:5000/ws');
 
       websocket.onopen = () => {
           console.log('WebSocket connection established');
