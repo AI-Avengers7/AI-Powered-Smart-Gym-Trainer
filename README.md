@@ -42,7 +42,7 @@ This project aims to help fitness enthusiasts, beginners, and gym owners/trainer
 - **Backend**: Flask (for the RESTful API)
 - **AI Pose Detection**: OpenPose or MediaPipe (for analyzing user movements)
 - **Camera**: Standard webcam or external USB camera
-- **Database**: SQLite, PostgreSQL, or MongoDB (for storing user data)
+- **Database**: PostgreSQL (for storing user data)
 - **Libraries**:
     - OpenCV (for capturing and processing video frames)
     - WebSocket or HTTP requests (for real-time communication between frontend and backend)
