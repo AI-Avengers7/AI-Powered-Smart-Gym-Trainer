@@ -19,60 +19,18 @@
         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 1116 0A8 8 0 014 12z"></path>
       </svg>
     </div>
-
-    <button id="sendVideo" class="mt-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700">
-      Send Video to Backend
-    </button>
+    <button></button>
+    <div class="flex space-x-4 justify-center">
+      <button id="startExercise" class="mt-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700">
+        Start Exercise
+      </button>
+      <button id="EndExercise" class="mt-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700">
+        End Exercise
+      </button>
   </div>
 
-  <script>
-    const videoElement = document.getElementById('video');
-    const loadingElement = document.getElementById('loading');
-    const sendButton = document.getElementById('sendVideo');
-
-    // Accessing the webcam
-    async function startVideo() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        videoElement.srcObject = stream;
-        loadingElement.style.display = 'none'; 
-      } catch (error) {
-        console.error('Error accessing webcam:', error);
-        alert('Could not access the webcam');
-      }
-    }
-
-    async function sendVideoToBackend() {
-      const stream = videoElement.srcObject;
-      if (!stream) return alert('No video stream available');
-
-      const tracks = stream.getTracks();
-      const videoTrack = tracks.find(track => track.kind === 'video');
-
-      const formData = new FormData();
-      formData.append('video', videoTrack);
-
-      try {
-        const response = await fetch('/upload_video', {
-          method: 'POST',
-          body: formData
-        });
-
-        if (response.ok) {
-          alert('Video sent to backend');
-        } else {
-          alert('Failed to send video');
-        }
-      } catch (error) {
-        console.error('Error sending video:', error);
-        alert('Error sending video to backend');
-      }
-    }
-
-    startVideo();
-
-    sendButton.addEventListener('click', sendVideoToBackend);
-  </script>
+  </div>
   
+  <script src="{{ url_for('static',filename= 'workout.js') }}"></script>
 </body>
 </html>
