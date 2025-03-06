@@ -1,6 +1,19 @@
-from app import create_app
+from flask import Flask
+from app.models import db  # Import db from app/models/__init__.py
+from app.models.user_model import User
+from app.models.workout_model import Workout
+from config import Config
 
-app = create_app()
+app = Flask(__name__)
+app.config.from_object(Config)  # Load configuration from config.py
 
-if __name__ == '__main__':
+# Initialize database
+db.init_app(app)
+
+# Create database tables before the first request
+with app.app_context():
+    db.create_all()
+
+if __name__ == "__main__":
     app.run(debug=True)
+
