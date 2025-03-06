@@ -1,6 +1,7 @@
 const videoElement = document.getElementById('video');
 const startButton = document.getElementById('startExercise');
 const stopButton = document.getElementById('EndExercise');
+const status = document.getElementById('status')
 
 let mediaStream = null;
 let websocket = null;
@@ -8,80 +9,76 @@ let videoWidth = 640;
 let videoHeight = 480;
 
 
-// Create canvas for frame processing
 const canvas = document.createElement('canvas');
 const context = canvas.getContext('2d');
 
 startButton.addEventListener('click', async () => {
-  try {
-      // Request camera access
-      mediaStream = await navigator.mediaDevices.getUserMedia({ 
-          video: { 
-              width: { ideal: videoWidth },
-              height: { ideal: videoHeight }
-          } 
-      });
-      
-      // Set video source to camera stream
-      videoElement.srcObject = mediaStream;
+    try {
 
-      // Setup WebSocket connection
-      websocket = new WebSocket('ws://localhost:5000/ws');
+        mediaStream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: videoWidth },
+                height: { ideal: videoHeight }
+            } 
+        });
 
-      websocket.onopen = () => {
-          console.log('WebSocket connection established');
-          startStreamingFrames();
-      };
+        videoElement.srcObject = mediaStream;
 
-      websocket.onerror = (error) => {
-          console.error('WebSocket Error:', error);
-      };
+        socket = io('http://localhost:5000');
 
-      websocket.onclose = () => {
-          console.log('WebSocket connection closed');
-      };
-  } catch (error) {
-      console.error('Error accessing camera:', error);
-      alert('Could not access camera. Please check permissions.');
-  }
+        socket.on('connect', () => {
+            console.log('Socket.IO connection established');
+            startStreamingFrames();
+        });
+
+        socket.on('error', (error) => {
+            console.error('Socket.IO Error:', error);
+        });
+
+        socket.on('disconnect', () => {
+            console.log('Socket.IO connection closed');
+        });
+
+        socket.on('response', (data) => {
+            console.log('Server response:', data.message);
+        });
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Could not access camera. Please check permissions.');
+    }
 });
 
 function startStreamingFrames() {
-  if (!mediaStream || !websocket) return;
+    if (!mediaStream || !socket) return;
 
-  canvas.width = videoWidth;
-  canvas.height = videoHeight;
+    canvas.width = videoWidth;
+    canvas.height = videoHeight;
 
-  function processFrame() {
-      if (websocket.readyState === WebSocket.OPEN) {
-          // Draw current video frame to canvas
-          context.drawImage(videoElement, 0, 0, videoWidth, videoHeight);
-          
-          // Convert canvas to base64
-          const imageData = canvas.toDataURL('image/jpeg', 0.7);
-          
-          // Send frame via WebSocket
-          websocket.send(imageData);
-      }
+    function processFrame() {
+        if (socket.connected) {
 
-      // Continue streaming if camera is active
-      if (mediaStream.active) {
-          requestAnimationFrame(processFrame);
-      }
-  }
+            context.drawImage(videoElement, 0, 0, videoWidth, videoHeight);
 
-  // Start frame processing
-  processFrame();
+            const imageData = canvas.toDataURL('image/jpeg', 0.7);
+
+            socket.emit('frame', imageData);
+        }
+
+        if (mediaStream.active) {
+            requestAnimationFrame(processFrame);
+        }
+    }
+
+    processFrame();
 }
 
 stopButton.addEventListener('click', () => {
-  if (mediaStream) {
-      // Stop all tracks
-      mediaStream.getTracks().forEach(track => track.stop());
-      videoElement.srcObject = null;
-  }
+    if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        videoElement.srcObject = null;
+    }
 
-  if (websocket) {
-      websocket.close();
-  }
+    if (socket) {
+        socket.disconnect();
+    }
 });
