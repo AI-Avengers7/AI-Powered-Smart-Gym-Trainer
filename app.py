@@ -1,3 +1,6 @@
+from app.models import db  # Import db from app/models/__init__.py
+from app.models.user_model import User
+from app.models.workout_model import Workout
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 import base64
@@ -10,6 +13,13 @@ from config import config
 app = Flask(__name__, static_folder=os.path.abspath('app/views/static'), template_folder=os.path.abspath('app/views/templates'))
 app.secret_key = "test"
 app.config.from_object(config)
+
+# Initialize database
+db.init_app(app)
+
+# Create database tables before the first request
+with app.app_context():
+    db.create_all()
 
 socketio = SocketIO(app)
 
