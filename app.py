@@ -1,4 +1,4 @@
-from app.models import db  # Import db from app/models/__init__.py
+from app.models import db
 from app.models.user_model import User
 from app.models.workout_model import Workout
 from flask import Flask, render_template, request
