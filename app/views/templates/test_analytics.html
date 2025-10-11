@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Analytics - AI Gym Trainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-white text-3xl font-bold mb-8">📊 Analytics API Test</h1>
+        
+        <div class="space-y-4">
+            <!-- Summary Test -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-white text-xl font-bold mb-4">Summary Endpoint</h2>
+                <button onclick="testEndpoint('/analytics/summary', 'summaryResult')" 
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Test /analytics/summary
+                </button>
+                <pre id="summaryResult" class="text-green-400 mt-4 text-sm overflow-auto"></pre>
+            </div>
+
+            <!-- Breakdown Test -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-white text-xl font-bold mb-4">Breakdown Endpoint</h2>
+                <button onclick="testEndpoint('/analytics/breakdown', 'breakdownResult')" 
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Test /analytics/breakdown
+                </button>
+                <pre id="breakdownResult" class="text-green-400 mt-4 text-sm overflow-auto"></pre>
+            </div>
+
+            <!-- Recent Test -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-white text-xl font-bold mb-4">Recent Activity Endpoint</h2>
+                <button onclick="testEndpoint('/analytics/recent', 'recentResult')" 
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Test /analytics/recent
+                </button>
+                <pre id="recentResult" class="text-green-400 mt-4 text-sm overflow-auto"></pre>
+            </div>
+
+            <!-- Records Test -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-white text-xl font-bold mb-4">Personal Records Endpoint</h2>
+                <button onclick="testEndpoint('/analytics/records', 'recordsResult')" 
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                    Test /analytics/records
+                </button>
+                <pre id="recordsResult" class="text-green-400 mt-4 text-sm overflow-auto"></pre>
+            </div>
+
+            <!-- Test All -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-white text-xl font-bold mb-4">Test All Endpoints</h2>
+                <button onclick="testAll()" 
+                        class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600 font-bold">
+                    🚀 Test All Endpoints
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="mt-8 text-center">
+            <a href="/analytics/" class="text-blue-400 hover:underline">← Back to Analytics Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        async function testEndpoint(url, resultId) {
+            const resultElement = document.getElementById(resultId);
+            resultElement.textContent = 'Loading...';
+            resultElement.className = 'text-yellow-400 mt-4 text-sm overflow-auto';
+
+            try {
+                const token = localStorage.getItem('access_token');
+                const headers = token ? {
+                    'Authorization': `Bearer ${token}`
+                } : {};
+
+                const response = await fetch(url, { headers });
+                const data = await response.json();
+
+                resultElement.textContent = JSON.stringify(data, null, 2);
+                resultElement.className = response.ok ? 
+                    'text-green-400 mt-4 text-sm overflow-auto' : 
+                    'text-red-400 mt-4 text-sm overflow-auto';
+
+            } catch (error) {
+                resultElement.textContent = `Error: ${error.message}`;
+                resultElement.className = 'text-red-400 mt-4 text-sm overflow-auto';
+            }
+        }
+
+        async function testAll() {
+            await testEndpoint('/analytics/summary', 'summaryResult');
+            await testEndpoint('/analytics/breakdown', 'breakdownResult');
+            await testEndpoint('/analytics/recent', 'recentResult');
+            await testEndpoint('/analytics/records', 'recordsResult');
+        }
+    </script>
+</body>
+</html>

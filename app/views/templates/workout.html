@@ -3,34 +3,165 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Set Up Camera</title>
+  <title>Workout - AI Gym Trainer</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pulse-green {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .pulse-green {
+      animation: pulse-green 1s ease-in-out infinite;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    .shake {
+      animation: shake 0.3s ease-in-out;
+    }
+  </style>
 </head>
-<body class="bg-gray-900 flex justify-center items-center min-h-screen">
+<body class="bg-gray-900 min-h-screen">
+  
+  <!-- Navigation -->
+  <nav class="bg-gray-800 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <h1 class="text-white text-2xl font-bold">🏋️ AI Gym Trainer</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="/" class="text-gray-300 hover:text-white px-3 py-2 rounded-md">Home</a>
+          <a href="/workout/" class="text-white bg-blue-600 px-3 py-2 rounded-md">Workout</a>
+          <a href="/analytics/" class="text-gray-300 hover:text-white px-3 py-2 rounded-md">Analytics</a>
+          <a href="/auth/logout" class="text-gray-300 hover:text-white px-3 py-2 rounded-md">Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
 
-  <div class="relative">
-    <h2 class="text-white text-3xl font-semibold mb-4 text-center">Real-Time Video Feed</h2>
-    
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Left Column - Video Feed -->
+      <div class="lg:col-span-2">
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+          <h2 class="text-white text-2xl font-semibold mb-4">📹 Live Camera Feed</h2>
+          
+          <!-- Video Container -->
+          <div class="relative bg-black rounded-lg overflow-hidden">
+            <video id="video" class="w-full h-auto" autoplay muted playsinline></video>
+            
+            <!-- Overlay Status -->
+            <div id="cameraStatus" class="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+              📷 Camera Off
+            </div>
+            
+            <!-- Posture Feedback Overlay -->
+            <div id="postureOverlay" class="absolute top-4 right-4 hidden">
+              <div class="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg">
+                <span id="postureText">✓ Good Form!</span>
+              </div>
+            </div>
+          </div>
 
-    <video id="video" class="w-full h-auto rounded-lg shadow-lg" autoplay muted playsinline></video>
+          <!-- Camera Controls -->
+          <div class="mt-4 flex space-x-3">
+            <button id="startCamera" class="flex-1 bg-blue-500 text-white px-4 py-3 rounded-lg hover:bg-blue-600 font-semibold transition">
+              📷 Start Camera
+            </button>
+            <button id="stopCamera" class="flex-1 bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 font-semibold transition hidden">
+              ⏹️ Stop Camera
+            </button>
+          </div>
+        </div>
+      </div>
 
+      <!-- Right Column - Stats & Controls -->
+      <div class="space-y-6">
+        
+        <!-- Rep Counter -->
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg text-center">
+          <h3 class="text-gray-400 text-sm font-semibold uppercase mb-2">Rep Count</h3>
+          <div id="repCounter" class="text-6xl font-bold text-white mb-2">0</div>
+          <div id="repStage" class="text-blue-400 text-lg font-semibold">Ready</div>
+        </div>
 
-    <button></button>
-    <div class="flex space-x-4 justify-center">
-      <button id="startExercise" class="mt-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700">
-        Start Exercise
-      </button>
-      <button id="EndExercise" class="mt-4 p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-700">
-        End Exercise
-      </button>
-      <p id="status"></p>
-  </div>
+        <!-- Exercise Selection -->
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-white text-lg font-semibold mb-4">🎯 Select Exercise</h3>
+          <select id="exerciseSelect" class="w-full bg-gray-700 text-white px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="bicep_curl">💪 Bicep Curl</option>
+            <option value="squat">🦵 Squat</option>
+            <option value="pushup">🤸 Push-up</option>
+            <option value="shoulder_press">💪 Shoulder Press</option>
+          </select>
+          
+          <!-- Exercise Controls -->
+          <div class="mt-4 space-y-3">
+            <button id="startExercise" class="w-full bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 font-semibold transition">
+              ▶️ Start Exercise
+            </button>
+            <button id="endExercise" class="w-full bg-red-500 text-white px-4 py-3 rounded-lg hover:bg-red-600 font-semibold transition hidden">
+              ⏸️ End Exercise
+            </button>
+          </div>
+        </div>
 
+        <!-- Session Stats -->
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-white text-lg font-semibold mb-4">📊 Session Stats</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-400">Duration:</span>
+              <span id="sessionDuration" class="text-white font-semibold">00:00</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-400">Total Reps:</span>
+              <span id="totalReps" class="text-white font-semibold">0</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-gray-400">Calories:</span>
+              <span id="calories" class="text-white font-semibold">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form Feedback -->
+        <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+          <h3 class="text-white text-lg font-semibold mb-4">💡 Form Tips</h3>
+          <div id="formFeedback" class="space-y-2">
+            <div class="flex items-start space-x-2">
+              <span class="text-blue-400">•</span>
+              <p class="text-gray-300 text-sm">Position yourself in front of camera</p>
+            </div>
+            <div class="flex items-start space-x-2">
+              <span class="text-blue-400">•</span>
+              <p class="text-gray-300 text-sm">Ensure good lighting</p>
+            </div>
+            <div class="flex items-start space-x-2">
+              <span class="text-blue-400">•</span>
+              <p class="text-gray-300 text-sm">Show full body for best results</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Connection Status -->
+        <div id="connectionStatus" class="bg-gray-800 rounded-lg p-4 shadow-lg">
+          <div class="flex items-center space-x-2">
+            <div id="statusIndicator" class="w-3 h-3 bg-gray-500 rounded-full"></div>
+            <span id="statusText" class="text-gray-400 text-sm">Disconnected</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
   <script src="{{ url_for('static',filename= 'js/workout.js') }}"></script>
-  
 
 </body>
 </html>

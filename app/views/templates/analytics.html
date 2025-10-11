@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - AI Gym Trainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-900 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-gray-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <h1 class="text-white text-2xl font-bold">🏋️ AI Gym Trainer</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-300 hover:text-white px-3 py-2 rounded-md">Home</a>
+                    <a href="/workout/" class="text-gray-300 hover:text-white px-3 py-2 rounded-md">Workout</a>
+                    <a href="/analytics/" class="text-white bg-blue-600 px-3 py-2 rounded-md">Analytics</a>
+                    <a href="/auth/logout" class="text-gray-300 hover:text-white px-3 py-2 rounded-md">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h2 class="text-white text-3xl font-bold mb-8">📊 Workout Analytics</h2>
+
+        <!-- Loading State -->
+        <div id="loading" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
+            <p class="text-white mt-4">Loading your analytics...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error" class="hidden bg-red-500 text-white p-4 rounded-lg mb-6">
+            <p id="errorMessage"></p>
+        </div>
+
+        <!-- Analytics Content -->
+        <div id="analyticsContent" class="hidden">
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Workouts -->
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Total Workouts</p>
+                            <p id="totalWorkouts" class="text-white text-3xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="bg-blue-500 rounded-full p-3">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Reps -->
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Total Reps</p>
+                            <p id="totalReps" class="text-white text-3xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="bg-green-500 rounded-full p-3">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- This Week -->
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">This Week</p>
+                            <p id="weekWorkouts" class="text-white text-3xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="bg-purple-500 rounded-full p-3">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Streak -->
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-400 text-sm">Streak Days</p>
+                            <p id="streakDays" class="text-white text-3xl font-bold mt-2">0</p>
+                        </div>
+                        <div class="bg-yellow-500 rounded-full p-3">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Exercise Breakdown -->
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <h3 class="text-white text-xl font-bold mb-4">Exercise Breakdown</h3>
+                    <canvas id="exerciseChart"></canvas>
+                </div>
+
+                <!-- Progress Chart -->
+                <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                    <h3 class="text-white text-xl font-bold mb-4">Weekly Progress</h3>
+                    <canvas id="progressChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="bg-gray-800 rounded-lg p-6 shadow-lg mb-8">
+                <h3 class="text-white text-xl font-bold mb-4">Recent Activity</h3>
+                <div id="recentActivity" class="space-y-4">
+                    <!-- Activity items will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Personal Records -->
+            <div class="bg-gray-800 rounded-lg p-6 shadow-lg">
+                <h3 class="text-white text-xl font-bold mb-4">🏆 Personal Records</h3>
+                <div id="personalRecords" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Records will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let exerciseChart = null;
+        let progressChart = null;
+
+        // Load analytics data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAnalytics();
+        });
+
+        async function loadAnalytics() {
+            try {
+                // Get access token
+                const token = localStorage.getItem('access_token');
+                const headers = token ? {
+                    'Authorization': `Bearer ${token}`
+                } : {};
+
+                console.log('Loading analytics data...');
+
+                // Fetch analytics data
+                const [summaryRes, breakdownRes, recentRes, recordsRes] = await Promise.all([
+                    fetch('/analytics/summary', { headers }),
+                    fetch('/analytics/breakdown', { headers }),
+                    fetch('/analytics/recent', { headers }),
+                    fetch('/analytics/records', { headers })
+                ]);
+
+                console.log('Responses received:', {
+                    summary: summaryRes.status,
+                    breakdown: breakdownRes.status,
+                    recent: recentRes.status,
+                    records: recordsRes.status
+                });
+
+                // Check if all responses are OK
+                if (!summaryRes.ok || !breakdownRes.ok || !recentRes.ok || !recordsRes.ok) {
+                    throw new Error('One or more API requests failed');
+                }
+
+                const summary = await summaryRes.json();
+                const breakdown = await breakdownRes.json();
+                const recent = await recentRes.json();
+                const records = await recordsRes.json();
+
+                console.log('Data loaded:', { summary, breakdown, recent, records });
+
+                // Update summary cards
+                updateSummaryCards(summary);
+
+                // Create charts
+                createExerciseChart(breakdown);
+                createProgressChart(summary);
+
+                // Update recent activity - extract array from response
+                const recentActivities = recent.recent_activity || recent;
+                updateRecentActivity(recentActivities);
+
+                // Update personal records
+                updatePersonalRecords(records);
+
+                // Hide loading, show content
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('analyticsContent').classList.remove('hidden');
+
+                console.log('Analytics loaded successfully!');
+
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+                showError('Failed to load analytics data. Please check the console for details.');
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        function updateSummaryCards(summary) {
+            document.getElementById('totalWorkouts').textContent = summary.total_workouts || 0;
+            document.getElementById('totalReps').textContent = summary.total_reps || 0;
+            document.getElementById('weekWorkouts').textContent = summary.week_workouts || 0;
+            document.getElementById('streakDays').textContent = summary.streak_days || 0;
+        }
+
+        function createExerciseChart(breakdown) {
+            const ctx = document.getElementById('exerciseChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (exerciseChart) {
+                exerciseChart.destroy();
+            }
+
+            const exercises = Object.keys(breakdown);
+            const counts = Object.values(breakdown);
+
+            exerciseChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: exercises.length > 0 ? exercises : ['No data'],
+                    datasets: [{
+                        data: counts.length > 0 ? counts : [1],
+                        backgroundColor: [
+                            '#3B82F6', '#10B981', '#F59E0B', '#EF4444',
+                            '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16'
+                        ],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#fff',
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createProgressChart(summary) {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (progressChart) {
+                progressChart.destroy();
+            }
+
+            // Generate last 7 days
+            const days = [];
+            const data = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                days.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+                // Mock data for now - you can fetch real data from API
+                data.push(Math.floor(Math.random() * 50) + 10);
+            }
+
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: days,
+                    datasets: [{
+                        label: 'Reps',
+                        data: data,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#fff'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#9CA3AF'
+                            },
+                            grid: {
+                                color: 'rgba(156, 163, 175, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#9CA3AF'
+                            },
+                            grid: {
+                                color: 'rgba(156, 163, 175, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateRecentActivity(activities) {
+            const container = document.getElementById('recentActivity');
+            
+            console.log('Recent activities data:', activities, 'Type:', typeof activities);
+            
+            // Handle different data types
+            let activityArray = [];
+            if (Array.isArray(activities)) {
+                activityArray = activities;
+            } else if (activities && typeof activities === 'object') {
+                // If it's an object, try to extract activities array
+                activityArray = activities.activities || activities.data || [];
+            }
+            
+            if (!activityArray || activityArray.length === 0) {
+                container.innerHTML = '<p class="text-gray-400">No recent activity found. Start your first workout!</p>';
+                return;
+            }
+
+            container.innerHTML = activityArray.map(activity => `
+                <div class="flex items-center justify-between p-4 bg-gray-700 rounded-lg">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-blue-500 rounded-full p-2">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-white font-semibold">${activity.exercise_name || activity.exercise || 'Unknown'}</p>
+                            <p class="text-gray-400 text-sm">${activity.date ? new Date(activity.date).toLocaleDateString() : 'N/A'}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white font-bold">${activity.reps || 0} reps</p>
+                        <p class="text-gray-400 text-sm">${activity.duration || 0} min</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updatePersonalRecords(records) {
+            const container = document.getElementById('personalRecords');
+            
+            console.log('Personal records data:', records, 'Type:', typeof records);
+            
+            // Handle different data types
+            let recordsObj = {};
+            if (records && typeof records === 'object' && !Array.isArray(records)) {
+                recordsObj = records.records || records.data || records;
+            }
+            
+            if (!recordsObj || Object.keys(recordsObj).length === 0) {
+                container.innerHTML = '<p class="text-gray-400 col-span-full">No records yet. Keep working out to set new records!</p>';
+                return;
+            }
+
+            container.innerHTML = Object.entries(recordsObj).map(([exercise, record]) => {
+                // Handle different record formats
+                const maxReps = record.max_reps || record.reps || record || 0;
+                return `
+                    <div class="bg-gray-700 rounded-lg p-4 text-center">
+                        <p class="text-gray-400 text-sm mb-2">${exercise}</p>
+                        <p class="text-white text-2xl font-bold">${maxReps}</p>
+                        <p class="text-gray-400 text-xs mt-1">reps</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showError(message) {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+        }
+    </script>
+</body>
+</html>

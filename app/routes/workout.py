@@ -39,7 +39,8 @@ def process_frame(frame, user_id):
     """
     # Initialize user state if it doesn't exist
     if user_id not in user_states:
-        user_states[user_id] = {'count': 0, 'stage': ''}
+        user_states[user_id] = {'count': 0, 'stage': 'ready', 'last_count': 0}
+        print(f"🆕 Initialized state for user {user_id}")
 
     # Get the user's state
     state = user_states[user_id]
@@ -53,21 +54,38 @@ def process_frame(frame, user_id):
 
     # Check if landmarks are detected
     if landmarks is None:
-        return state['count'], state['stage']
+        # No pose detected, keep current state
+        return state['count'], state.get('stage', 'ready')
 
     # Calculate bicep curl angles
-    r_angle, l_angle = bicep_curl(landmarks)
+    l_angle, r_angle = bicep_curl(landmarks)
 
     # Check if angles are valid
     if l_angle is None or r_angle is None:
-        return state['count'], state['stage']
+        return state['count'], state.get('stage', 'ready')
 
-    # Update stage and count
-    if r_angle > 160 or l_angle > 160:
-        state['stage'] = 'down'
-    if r_angle < 30 and state['stage'] == 'down':
-        state['stage'] = 'up'
-        state['count'] += 1
+    # Use the smaller angle (the arm being used)
+    angle = min(l_angle, r_angle)
+
+    # Update stage and count based on angle
+    # DOWN position: arm is extended (angle > 160)
+    if angle > 160:
+        if state['stage'] != 'down':
+            state['stage'] = 'down'
+            
+    # UP position: arm is curled (angle < 40)
+    elif angle < 40:
+        if state['stage'] == 'down':
+            # Just completed a rep!
+            state['stage'] = 'up'
+            state['count'] += 1
+            print(f"✅ Rep completed! User {user_id}: Count={state['count']}, Angle={angle}")
+    
+    # MIDDLE position
+    elif 40 <= angle <= 160:
+        # Moving through the middle range
+        if state['stage'] == 'up' and angle > 90:
+            state['stage'] = 'down'  # Going back down
 
     return state['count'], state['stage']
 

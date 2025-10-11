@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>Sign Up - AI Gym Trainer</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-900 flex justify-center items-center min-h-screen">
     <div class="bg-gray-800 p-8 rounded-lg shadow-lg max-w-sm w-full">
         <h2 class="text-white text-3xl font-semibold text-center mb-6">Sign Up</h2>
         
-        <form action="#" method="POST">
+        <!-- Error/Success Messages -->
+        <div id="message" class="mb-4 hidden"></div>
+        
+        <form id="signupForm" onsubmit="handleSignup(event)">
             <div class="mb-4">
                 <label for="name" class="block text-white text-sm font-medium mb-2">Full Name</label>
                 <input type="text" id="name" name="name" class="w-full px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
@@ -35,8 +38,87 @@
         </form>
 
         <p class="text-center text-white text-sm mt-4">
-            Already have an account? <a href="login.html" class="text-blue-400 hover:underline">Log in</a>
+            Already have an account? <a href="/auth/login" class="text-blue-400 hover:underline">Log in</a>
         </p>
     </div>
+
+    <script>
+        async function handleSignup(event) {
+            event.preventDefault();
+            
+            const messageDiv = document.getElementById('message');
+            const submitButton = event.target.querySelector('button[type="submit"]');
+            
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            // Validate passwords match
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match!', 'error');
+                return;
+            }
+            
+            // Validate password length
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters long!', 'error');
+                return;
+            }
+            
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.textContent = 'Creating account...';
+            
+            try {
+                const response = await fetch('/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showMessage(data.message || 'Registration successful! Redirecting to login...', 'success');
+                    
+                    // Redirect to login after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/auth/login';
+                    }, 2000);
+                } else {
+                    showMessage(data.error || 'Registration failed. Please try again.', 'error');
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Sign Up';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Network error. Please try again.', 'error');
+                submitButton.disabled = false;
+                submitButton.textContent = 'Sign Up';
+            }
+        }
+        
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = `mb-4 p-3 rounded-md ${type === 'error' ? 'bg-red-500' : 'bg-green-500'} text-white`;
+            messageDiv.textContent = message;
+            messageDiv.classList.remove('hidden');
+            
+            // Auto-hide success messages after 5 seconds
+            if (type === 'success') {
+                setTimeout(() => {
+                    messageDiv.classList.add('hidden');
+                }, 5000);
+            }
+        }
+    </script>
 </body>
 </html>
