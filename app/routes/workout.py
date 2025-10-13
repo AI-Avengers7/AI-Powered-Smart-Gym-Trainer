@@ -67,25 +67,47 @@ def process_frame(frame, user_id):
     # Use the smaller angle (the arm being used)
     angle = min(l_angle, r_angle)
 
+    # Adjusted thresholds for better detection:
+    # DOWN position: arm is mostly extended (more forgiving)
+    DOWN_THRESHOLD = 140
+    # UP position: arm is well curled (more achievable)
+    UP_THRESHOLD = 50
+    # Middle range boundaries
+    MIDDLE_LOW = 70
+    MIDDLE_HIGH = 120
+
     # Update stage and count based on angle
-    # DOWN position: arm is extended (angle > 160)
-    if angle > 160:
+    # DOWN position: arm is extended (angle > 140°)
+    if angle > DOWN_THRESHOLD:
         if state['stage'] != 'down':
             state['stage'] = 'down'
+            print(f"⬇️  User {user_id}: DOWN position (angle={angle:.1f}°)")
             
-    # UP position: arm is curled (angle < 40)
-    elif angle < 40:
+    # UP position: arm is curled (angle < 50°)
+    elif angle < UP_THRESHOLD:
         if state['stage'] == 'down':
             # Just completed a rep!
             state['stage'] = 'up'
             state['count'] += 1
-            print(f"✅ Rep completed! User {user_id}: Count={state['count']}, Angle={angle}")
+            print(f"✅ REP COMPLETED! User {user_id}: Count={state['count']}, Angle={angle:.1f}°")
+        elif state['stage'] != 'up':
+            state['stage'] = 'up'
+            print(f"⬆️  User {user_id}: UP position (angle={angle:.1f}°)")
     
-    # MIDDLE position
-    elif 40 <= angle <= 160:
-        # Moving through the middle range
-        if state['stage'] == 'up' and angle > 90:
-            state['stage'] = 'down'  # Going back down
+    # MIDDLE position - transitioning
+    elif UP_THRESHOLD <= angle <= DOWN_THRESHOLD:
+        # In the middle range - moving between positions
+        if state['stage'] == 'up' and angle > MIDDLE_HIGH:
+            # Coming down from curled position
+            state['stage'] = 'lowering'
+            print(f"↘️  User {user_id}: Lowering arm (angle={angle:.1f}°)")
+        elif state['stage'] == 'down' and angle < MIDDLE_LOW:
+            # Coming up from extended position  
+            state['stage'] = 'raising'
+            print(f"↗️  User {user_id}: Raising arm (angle={angle:.1f}°)")
+        elif state['stage'] == 'lowering' and angle > DOWN_THRESHOLD:
+            # Reached down position from lowering
+            state['stage'] = 'down'
 
     return state['count'], state['stage']
 
