@@ -2,7 +2,7 @@
 AI-Powered Smart Gym Trainer
 Main application file with Flask server setup and WebSocket handling.
 """
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
@@ -17,12 +17,11 @@ from config import config
 
 # Import database and models
 from app.models import db
-from app.models.user_model import User
-from app.models.workout_model import Workout
 
 # Import routes
 from app.routes.auth_routes import auth_bp
-from app.routes.workout import workout_bp, process_frame
+from app.routes.workout import workout_bp
+from app.utils.pose_processing import process_frame
 from app.routes.analytics_routes import analytics_bp
 
 # Initialize Flask app
@@ -66,7 +65,6 @@ def index():
 @app.route('/routes')
 def list_routes():
     """List all available routes for debugging."""
-    import urllib
     output = []
     for rule in app.url_map.iter_rules():
         methods = ','.join(sorted(rule.methods - {'HEAD', 'OPTIONS'}))
@@ -118,6 +116,16 @@ def handle_disconnect():
     print(f'Client disconnected: {request.sid}')
 
 
+def decode_frame(data):
+    """Decode base64 image data."""
+    if ',' in data:
+        header, encoded = data.split(",", 1)
+    else:
+        encoded = data
+    binary_data = base64.b64decode(encoded)
+    image_array = np.frombuffer(binary_data, dtype=np.uint8)
+    return cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+
 @socketio.on('frame')
 def handle_frame(data):
     """
@@ -129,15 +137,7 @@ def handle_frame(data):
     user_id = request.sid
     
     try:
-        # Decode the base64 image
-        if ',' in data:
-            header, encoded = data.split(",", 1)
-        else:
-            encoded = data
-            
-        binary_data = base64.b64decode(encoded)
-        image_array = np.frombuffer(binary_data, dtype=np.uint8)
-        frame = cv2.imdecode(image_array, cv2.IMREAD_COLOR)
+        frame = decode_frame(data)
         
         if frame is None:
             print(f"❌ Invalid frame from {user_id}")
@@ -147,14 +147,11 @@ def handle_frame(data):
             }, room=request.sid)
             return
         
-        # Process the frame for pose detection
         count, stage = process_frame(frame, user_id)
         
-        # Log every 30th frame to avoid spam
         if count % 5 == 0 or stage == 'up':
             print(f"🏋️ User {user_id}: Count={count}, Stage={stage}")
         
-        # Send response back to client
         socketio.emit('response', {
             'status': 'success',
             'count': count,

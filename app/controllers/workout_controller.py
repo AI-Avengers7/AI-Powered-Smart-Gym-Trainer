@@ -2,11 +2,9 @@
 Workout Controller
 Handles workout logging, retrieval, and management operations.
 """
-from flask import jsonify
 from app.models import db
 from app.models.workout_model import Workout
 from app.models.user_model import User
-from datetime import datetime
 
 
 class WorkoutController:

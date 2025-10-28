@@ -2,7 +2,7 @@
 Authentication Controller
 Handles user registration, login, and authentication logic.
 """
-from flask import jsonify, session
+from flask import session
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
 from app.models import db

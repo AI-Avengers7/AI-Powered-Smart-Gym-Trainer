@@ -130,7 +130,7 @@ class PoseDetector:
             right_angle = self.calculate_angle(right_shoulder, right_elbow, right_wrist)
             
             return left_angle, right_angle
-        except:
+        except Exception:
             return None, None
     
     def detect_squat(self, landmarks):
@@ -161,7 +161,7 @@ class PoseDetector:
             right_angle = self.calculate_angle(right_hip, right_knee, right_ankle)
             
             return left_angle, right_angle
-        except:
+        except Exception:
             return None, None
     
     def detect_pushup(self, landmarks):
@@ -192,7 +192,7 @@ class PoseDetector:
             right_angle = self.calculate_angle(right_shoulder, right_elbow, right_wrist)
             
             return left_angle, right_angle
-        except:
+        except Exception:
             return None, None
     
     def detect_shoulder_press(self, landmarks):
@@ -223,7 +223,7 @@ class PoseDetector:
             right_angle = self.calculate_angle(right_elbow, right_shoulder, right_hip)
             
             return left_angle, right_angle
-        except:
+        except Exception:
             return None, None
     
     def close(self):

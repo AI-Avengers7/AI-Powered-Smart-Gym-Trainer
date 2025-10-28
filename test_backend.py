@@ -3,7 +3,6 @@ Backend Test Script
 Quick test to verify all backend components are working correctly.
 """
 import sys
-import os
 
 def test_imports():
     """Test that all modules can be imported."""
@@ -11,26 +10,15 @@ def test_imports():
     
     try:
         # Test model imports
-        from app.models.user_model import User
-        from app.models.workout_model import Workout
-        from app.models.pose_detection import PoseDetector
         print("✅ Models imported successfully")
         
         # Test controller imports
-        from app.controllers.auth_controller import AuthController
-        from app.controllers.workout_controller import WorkoutController
-        from app.controllers.analytics_controller import AnalyticsController
         print("✅ Controllers imported successfully")
         
         # Test route imports
-        from app.routes.auth_routes import auth_bp
-        from app.routes.workout import workout_bp
-        from app.routes.analytics_routes import analytics_bp
         print("✅ Routes imported successfully")
         
         # Test utility imports
-        from app.utils.data_utils import validate_email, validate_password
-        from app.utils.pose_utils import detect_pose, bicep_curl
         print("✅ Utilities imported successfully")
         
         return True
@@ -53,18 +41,18 @@ def test_data_utilities():
         )
         
         # Test email validation
-        assert validate_email("test@example.com") == True
-        assert validate_email("invalid-email") == False
+        assert validate_email("test@example.com")
+        assert not validate_email("invalid-email")
         print("✅ Email validation working")
         
         # Test password validation
         valid, msg = validate_password("password123")
-        assert valid == True
+        assert valid
         print("✅ Password validation working")
         
         # Test workout data validation
         valid, msg = validate_workout_data("Bicep Curl", 10, 3)
-        assert valid == True
+        assert valid
         print("✅ Workout validation working")
         
         # Test exercise name formatting

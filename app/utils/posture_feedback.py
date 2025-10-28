@@ -1,4 +1,7 @@
-from pose_utils import *
+from app.utils.pose_utils import calculate_angle, detect_pose, bicep_curl
+import mediapipe as mp
+
+mp_pose = mp.solutions.pose
 
 # Global variables for user states
 user_states = {}

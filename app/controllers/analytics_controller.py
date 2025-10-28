@@ -2,11 +2,8 @@
 Analytics Controller
 Handles workout analytics, statistics, and progress tracking.
 """
-from flask import jsonify
-from app.models import db
 from app.models.workout_model import Workout
 from app.models.user_model import User
-from sqlalchemy import func
 from collections import defaultdict
 
 

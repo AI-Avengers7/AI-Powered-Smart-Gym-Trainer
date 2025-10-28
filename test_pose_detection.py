@@ -3,7 +3,6 @@ Test script to verify MediaPipe pose detection is working correctly.
 This will help debug the rep counting issue by showing detected angles in real-time.
 """
 import cv2
-import numpy as np
 from app.utils.pose_utils import detect_pose, bicep_curl
 
 def main():

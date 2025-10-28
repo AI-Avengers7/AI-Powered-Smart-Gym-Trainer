@@ -3,7 +3,6 @@ Data Utilities
 Helper functions for data validation, processing, and transformation.
 """
 import re
-from datetime import datetime
 
 
 def validate_email(email):
@@ -150,7 +149,7 @@ def calculate_workout_duration(start_time, end_time):
     try:
         duration = (end_time - start_time).total_seconds() / 60
         return round(duration, 2)
-    except:
+    except Exception:
         return 0
 
 
